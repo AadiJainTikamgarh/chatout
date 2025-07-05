@@ -26,9 +26,9 @@ export async function POST(request) {
       return NextResponse.json({ error: "Invalid Password" }, { status: 403 });
     }
 
-    const token = user.generateRefreshToken();
+    const token = await user.generateRefreshToken();
 
-    const response = new NextResponse.json(
+    const response =  NextResponse.json(
       { message: "User login successfully", success: true },
       { status: 200 }
     );

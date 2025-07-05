@@ -1,5 +1,5 @@
 import mongoose, { mongo, Schema } from "mongoose";
-import bcryptjs from "bcryptjs";
+import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 const UserSchema = new Schema(
@@ -20,27 +20,24 @@ const UserSchema = new Schema(
   { timestamps: true }
 );
 
-UserSchema.pre("save", async (next) => {
-  if (!this.isModified("password")) {
-    next();
-  }
+UserSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) return next(); 
 
-  this.password = await bcryptjs.hash(this.password, 10);
+  this.password = await bcrypt.hash(this.password, 10);
 
   next();
 });
 
 UserSchema.methods.isPasswordMatch = async function (password) {
-  return await bcryptjs.compare(password, this.password);
+  return await bcrypt.compare(password, this.password);
 };
 
-UserSchema.method.generateRefreshToken = async function () {
+UserSchema.methods.generateRefreshToken = async function () {
   const token = jwt.sign(
     {
       id: this._id,
     },
-    process.env.REFRESH_TOKEN_SECRET,
-    { expiresIn: process.env.REFRESH_TOKEN_EXPIRE_IN }
+    process.env.REFRESH_TOKEN_SECRET
   );
 
   return token;
