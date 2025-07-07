@@ -16,7 +16,9 @@ export async function GET(request) {
 
     const userList = await User.aggregate([{
         $match: {
-            $ne: ["$_id", new mongoose.Types.ObjectId(userId)]
+            _id : {
+              $ne: new mongoose.Types.ObjectId(userId)
+            }
         }
     }, {
         $project: {
