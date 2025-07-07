@@ -5,14 +5,7 @@ import React, { useEffect, useState } from "react";
 function page() {
   const [OpenChat, setOpenChat] = useState("");
   const [lastMessage, setLastMessage] = useState([]);
-  const [ChatList, setChatList] = useState([
-    { user: "Aadi Jain", lastmsg: "Hello World" },
-    { user: "John Doe", lastmsg: "How are you?" },
-    { user: "Jane Smith", lastmsg: "See you tomorrow" },
-    { user: "Alex Johnson", lastmsg: "Did you get my email?" },
-    { user: "Sarah Williams", lastmsg: "Thanks for your help" },
-    { user: "Michael Brown", lastmsg: "Let's meet at 5" },
-  ]);
+  const [ChatList, setChatList] = useState([]);
 
 
 
@@ -20,6 +13,7 @@ function page() {
     const fetchChats = async () => {
         try {
             const response = await axios.get("api/chats");
+            setChatList(response.data.chats);
 
             console.log(response);
 
@@ -29,6 +23,22 @@ function page() {
     }
 
     fetchChats();
+  }, []);
+
+  useEffect(() => {
+    const fetchMessages = async () => {
+      if (OpenChat) {
+        try {
+          const response = await axios.post("api/chat", {chatId: OpenChat})
+          setLastMessage(response.data.PastMessages);
+
+        } catch (error) {
+          console.log("Failed in fetching messages : ", error?.message);
+        }
+      }
+    }
+
+
   }, [OpenChat]);
 
   const chatComponent = () => { 
@@ -45,10 +55,10 @@ function page() {
               {lastMessage.map((msg) => {
                 return (
                   <div
-                    key={msg.id}
+                    key={msg._id}
                     className="bg-neutral-700 text-neutral-200 p-2 rounded-lg m-1"
                   >
-                    <p>{msg.text}</p>
+                    <p>{msg.content}</p>
                   </div>
                 );
               })}
@@ -78,15 +88,15 @@ function page() {
           </button>
         </div>
         {ChatList.map((chat, index) => (
-          <div className="flex flex-col gap-3 cursor-pointer" key={index}>
+          <div className="flex flex-col gap-3 cursor-pointer" key={chat?._id}>
             <div
               className="flex flex-row items-center justify-between p-3 hover:bg-neutral-700"
-              onClick={() => setOpenChat(chat.user)}
+              onClick={() => setOpenChat(chat?._id)}
             >
               <h1 className="text-lg font-mono text-neutral-200">
-                {chat.user}
+                {chat.otherParticipants[0]?.username}
               </h1>
-              <p className="text-sm text-neutral-400">{chat.lastmsg}</p>
+              <p className="text-sm text-neutral-400">{chat?.lastMessage || " "}</p>
             </div>
           </div>
         ))}

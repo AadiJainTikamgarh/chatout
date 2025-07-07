@@ -44,7 +44,7 @@ function page() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-neutral-950">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-neutral-950 w-full">
       <Toaster />
       <div className="flex flex-col item-center justify-center gap-3 p-4 rounded-2xl shadow-lg shadow-neutral-500 bg-neutral-200 min-w-[30%]">
         <h1 className="text-neutral-900 font-mono text-2xl text-center">

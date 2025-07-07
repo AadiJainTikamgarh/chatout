@@ -17,7 +17,7 @@ export const getUserID = async () => {
   try {
     const cookiesStore = await cookies();
     console.log(cookiesStore)
-    const token = cookiesStore.get("token")?.value;
+    const token = cookiesStore.get("token")?.value;   
   
     const decoded = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);
   
