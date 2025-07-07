@@ -15,7 +15,7 @@ function page() {
             const response = await axios.get("api/chats");
             setChatList(response.data.chats);
 
-            console.log(response);
+            // console.log(response);
 
         } catch (error) {
             console.log("Failed in fetching chats : ", error.message);
@@ -36,6 +36,8 @@ function page() {
           console.log("Failed in fetching messages : ", error?.message);
         }
       }
+
+      fetchMessages();
     }
 
 

@@ -7,7 +7,7 @@ import mongoose, { isValidObjectId } from "mongoose";
 
 connectDB();
 
-export async function GET() {
+export async function GET(request) {
   try {
     const { userId } = await getUserID();
 
@@ -61,7 +61,7 @@ export async function GET() {
     ]);
 
     if (!chats) {
-      return NextResponse.json({ message: "No Chats Found" }, { status: 404 });
+      return NextResponse.json({ error: "No Chats Found" }, { status: 404 });
     }
 
     return NextResponse.json({ chats, success: true }, { status: 200 });

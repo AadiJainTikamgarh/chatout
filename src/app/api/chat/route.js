@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import Message from "@/models/message.model";
 import { getUserID } from "@/helper/getUserId";
 import mongoose, { isValidObjectId } from "mongoose";
+import connectDB from "@/DB/dbconfig";
+
+connectDB();
 
 export async function POST(request) {
     try {
@@ -18,6 +21,10 @@ export async function POST(request) {
                 $eq: ["$chat", new mongoose.Types.ObjectId(chatId)]
             }
         }])
+
+        if(!PastMessages){
+            return NextResponse.json({error: "PastMessages not found"},{status: 404})
+        }
 
         return NextResponse.json({PastMessages, success: true}, {status: 200})
 
