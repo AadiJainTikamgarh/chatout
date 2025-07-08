@@ -1,12 +1,17 @@
 "use client";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
+import Modal from "@mui/material/Modal";
 
 function page() {
   const [OpenChat, setOpenChat] = useState("");
   const [lastMessage, setLastMessage] = useState([]);
   const [ChatList, setChatList] = useState([]);
-  const [UserList, setUserList] = useState(() => {
+  const [IsModelOpen, setIsModelOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState("");
+  const [UserList, setUserList] = useState([]);
+
+  useEffect(() => {
     const fetchUserList = async () => {
       try {
         const response = await axios.get("api/users");
@@ -17,8 +22,8 @@ function page() {
       }
     };
 
-    return fetchUserList();    
-  });
+    fetchUserList().then((users) => setUserList(users));
+  }, []);
 
   useEffect(() => {
     const fetchChats = async () => {
@@ -50,10 +55,28 @@ function page() {
     };
   }, [OpenChat]);
 
+  const createChatHandler = async () => {
+    if (!selectedUser) {
+      alert("Please select a user to chat with");
+      return;
+    }
+
+    setIsModelOpen(false);
+
+    try {
+      const response = await axios.post("api/createChat", {
+        chatWith: selectedUser,
+      });
+      
+    } catch (error) {
+      console.log("Failed to create chat: ", error.message);
+      alert("Failed to create chat, please try again later");
+    }
+  };
+
   const chatComponent = () => {
     return (
       <div className="flex flex-col bg-neutral-900 flex-1">
-        
         {OpenChat ? (
           <div className="w-full flex flex-col bg-neutral-900 items-start justify-between relative h-full">
             <div className="flex px-4 py-2 items-center bg-neutral-7    00 w-full">
@@ -95,32 +118,63 @@ function page() {
   };
 
   return (
-    <div className="flex flex-row item-center justify-center flex-1 bg-neutral-900 divide-x-2  m-3 rounded-lg overflow-hidden">
-      <div className="flex flex-col w-[25%] outline-none outline-r-2 outline-neutral-500">
-        <div className="flex justify-between items-center p-4 bg-neutral-700 text-neutral-200 outline-none outline-b-[1px] outline-neutral-600 mb-2">
-          <h1 className="text-2xl font-mono">Chats</h1>
-          <button className="bg-neutral-500 px-4 py-2 rounded-lg hover:bg-neutral-600">
-            New Chat
+    <>
+      <Modal
+        open={IsModelOpen}
+        onClose={() => setIsModelOpen(false)}
+        className="w-1/4 m-auto h-fit rounded-xl overflow-hidden"
+      >
+        <div className="flex flex-col items-center justify-center gap-3 bg-neutral-300 p-4">
+          <h1 className="text-center text-2xl text-neutral-900">Chat with </h1>
+          <select
+            className="w-full p-2 rounded-lg bg-neutral-200 text-neutral-900"
+            onChange={(e) => setSelectedUser(e.target?.value)}
+          >
+            <option value="">Select a user</option>
+            {UserList.map((user) => (
+              <option key={user._id} value={user._id}>
+                {user.username}
+              </option>
+            ))}
+          </select>
+          <button
+            className="bg-neutral-500 px-4 py-2 rounded-lg hover:bg-neutral-600"
+            onClick={createChatHandler}
+          >
+            Create Chat
           </button>
         </div>
-        {ChatList.map((chat, index) => (
-          <div className="flex flex-col gap-3 cursor-pointer" key={chat?._id}>
-            <div
-              className="flex flex-row items-center justify-between p-3 hover:bg-neutral-700"
-              onClick={() => setOpenChat(chat?._id)}
+      </Modal>
+      <div className="flex flex-row item-center justify-center flex-1 bg-neutral-900 divide-x-2  m-3 rounded-lg overflow-hidden">
+        <div className="flex flex-col w-[25%] outline-none outline-r-2 outline-neutral-500">
+          <div className="flex justify-between items-center p-4 bg-neutral-700 text-neutral-200 outline-none outline-b-[1px] outline-neutral-600 mb-2">
+            <h1 className="text-2xl font-mono">Chats</h1>
+            <button
+              className="bg-neutral-500 px-4 py-2 rounded-lg hover:bg-neutral-600"
+              onClick={() => setIsModelOpen(true)}
             >
-              <h1 className="text-lg font-mono text-neutral-200">
-                {chat.otherParticipants[0]?.username}
-              </h1>
-              <p className="text-sm text-neutral-400">
-                {chat?.lastMessage || " "}
-              </p>
-            </div>
+              New Chat
+            </button>
           </div>
-        ))}
+          {ChatList.map((chat, index) => (
+            <div className="flex flex-col gap-3 cursor-pointer" key={chat?._id}>
+              <div
+                className="flex flex-row items-center justify-between p-3 hover:bg-neutral-700"
+                onClick={() => setOpenChat(chat?._id)}
+              >
+                <h1 className="text-lg font-mono text-neutral-200">
+                  {chat.otherParticipants[0]?.username}
+                </h1>
+                <p className="text-sm text-neutral-400">
+                  {chat?.lastMessage || " "}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="flex-1 flex">{chatComponent()}</div>
       </div>
-      <div className="flex-1 flex">{chatComponent()}</div>
-    </div>
+    </>
   );
 }
 
