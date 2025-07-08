@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import Modal from "@mui/material/Modal";
 
 function page() {
-  const [OpenChat, setOpenChat] = useState("");
+  const [OpenChat, setOpenChat] = useState({ id: "", username: "" });
   const [lastMessage, setLastMessage] = useState([]);
   const [ChatList, setChatList] = useState([]);
   const [IsModelOpen, setIsModelOpen] = useState(false);
@@ -44,7 +44,9 @@ function page() {
     const fetchMessages = async () => {
       if (OpenChat) {
         try {
-          const response = await axios.post("api/chat", { chatId: OpenChat });
+          const response = await axios.post("api/chat", {
+            chatId: OpenChat.id,
+          });
           setLastMessage(response.data.PastMessages);
         } catch (error) {
           console.log("Failed in fetching messages : ", error?.message);
@@ -67,8 +69,15 @@ function page() {
       const response = await axios.post("api/createChat", {
         chatWith: selectedUser,
       });
-      
+
+      const chat = await axios.get("api/chats?id=" + response.data.chatId);
+      setChatList((prevChats) => [...prevChats, chat.data.chats[0]]);
+      setOpenChat({
+        id: response.data?.chatId,
+        username: chat.data?.chats[0]?.otherParticipants[0]?.username,
+      });
     } catch (error) {
+      console.log(error)
       console.log("Failed to create chat: ", error.message);
       alert("Failed to create chat, please try again later");
     }
@@ -77,11 +86,11 @@ function page() {
   const chatComponent = () => {
     return (
       <div className="flex flex-col bg-neutral-900 flex-1">
-        {OpenChat ? (
+        {OpenChat.id ? (
           <div className="w-full flex flex-col bg-neutral-900 items-start justify-between relative h-full">
-            <div className="flex px-4 py-2 items-center bg-neutral-7    00 w-full">
+            <div className="flex px-4 py-2 items-center bg-neutral-700 w-full">
               <h1 className="text-2xl font-mono text-neutral-200">
-                {OpenChat}
+                {OpenChat.username}
               </h1>
             </div>
             <div className="flex-1 flex justify-end items-center w-full ">
@@ -160,7 +169,12 @@ function page() {
             <div className="flex flex-col gap-3 cursor-pointer" key={chat?._id}>
               <div
                 className="flex flex-row items-center justify-between p-3 hover:bg-neutral-700"
-                onClick={() => setOpenChat(chat?._id)}
+                onClick={() =>
+                  setOpenChat({
+                    id: chat?._id,
+                    username: chat?.otherParticipants[0]?.username,
+                  })
+                }
               >
                 <h1 className="text-lg font-mono text-neutral-200">
                   {chat.otherParticipants[0]?.username}

@@ -41,7 +41,8 @@ export async function POST(request) {
       );
     }
 
-    const chatWithUser = await User.findById(chatWith.id);
+    console.log("Creating chat with user ID: ", chatWith);
+    const chatWithUser = await User.findById(chatWith);
 
     if (!chatWithUser) {
       return NextResponse.json(
@@ -68,7 +69,7 @@ export async function POST(request) {
     }
 
     return NextResponse.json(
-      { message: "Chat created successfully" },
+      { message: "Chat created successfully", chatId: savedChat._id },
       { status: 200 }
     );
 
