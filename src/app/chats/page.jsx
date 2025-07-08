@@ -2,14 +2,33 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import Modal from "@mui/material/Modal";
+import useSocket from "@/hooks/useSocket";
 
 function page() {
+  let userId = "";
   const [OpenChat, setOpenChat] = useState({ id: "", username: "" });
   const [lastMessage, setLastMessage] = useState([]);
   const [ChatList, setChatList] = useState([]);
   const [IsModelOpen, setIsModelOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState("");
   const [UserList, setUserList] = useState([]);
+  const [Messages, setMessages] = useState([]);
+  const [msg, setMsg] = useState("");
+  const socket = useSocket();
+
+  useEffect(() => {
+    const fetchUserId = async () => {
+      try {
+        const response = await axios.get("api/me");
+        userId = response.data.userId;
+        // console.log("User ID: ", userId);
+      } catch (error) {
+        console.log("Failed to fetch user ID: ", error.message);
+      }
+    };
+
+    fetchUserId();
+  }, []);
 
   useEffect(() => {
     const fetchUserList = async () => {
@@ -26,10 +45,25 @@ function page() {
   }, []);
 
   useEffect(() => {
+    if (!socket.current || !OpenChat.id) return;
+
+    socket.current.emit("join-room", OpenChat.id);
+
+    socket.current.on("receive-message", (data) => {
+      setMessages((prevMessages) => [...prevMessages, { ...data }]);
+    });
+
+    return () => {
+      socket.current?.off("receive-message");
+    };
+  }, [socket, OpenChat.id]);
+
+  useEffect(() => {
     const fetchChats = async () => {
       try {
         const response = await axios.get("api/chats");
         setChatList(response.data.chats);
+        console.log(ChatList);
 
         // console.log(response);
       } catch (error) {
@@ -77,9 +111,21 @@ function page() {
         username: chat.data?.chats[0]?.otherParticipants[0]?.username,
       });
     } catch (error) {
-      console.log(error)
+      console.log(error);
       console.log("Failed to create chat: ", error.message);
       alert("Failed to create chat, please try again later");
+    }
+  };
+
+  const sendMessage = () => {
+    console.log(msg);
+    if (msg.trim()) {
+      socket.current.emit("send-message", {
+        roomId: OpenChat.id,
+        message: msg,
+        sender: userId,
+      });
+      setMessages((prev) => [...prev, { message: msg, sender: userId }]);
     }
   };
 
@@ -93,14 +139,14 @@ function page() {
                 {OpenChat.username}
               </h1>
             </div>
-            <div className="flex-1 flex justify-end items-center w-full ">
-              {lastMessage.map((msg) => {
+            <div className="flex-1 flex-col flex justify-end item-end w-full ">
+              {Messages.map((msg, index) => {
                 return (
                   <div
-                    key={msg._id}
+                    key={index}
                     className="bg-neutral-700 text-neutral-200 p-2 rounded-lg m-1"
                   >
-                    <p>{msg.content}</p>
+                    <h1 className="text-2xl px-4 rounded-lg">{msg.message}</h1>
                   </div>
                 );
               })}
@@ -109,8 +155,13 @@ function page() {
               <input
                 type="text"
                 className="flex-1 outline-none border-b-2 px-3 text-xl"
+                value={msg}
+                onChange={(e) => setMsg(e.target.value)}
               />{" "}
-              <button className="flex items-center justify-center p-2 bg-neutral-700 text-neutral-200 ml-3 rounded-lg">
+              <button
+                className="flex items-center justify-center p-2 bg-neutral-700 text-neutral-200 ml-3 rounded-lg"
+                onClick={sendMessage}
+              >
                 Send
               </button>
             </div>
