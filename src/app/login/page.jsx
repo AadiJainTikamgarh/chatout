@@ -46,61 +46,38 @@ function page() {
   return (
     <>
       <Toaster />
-      <div className="flex flex-col items-center justify-center min-h-screen bg-neutral-950 w-full">
-        <div className="flex flex-col item-center justify-center gap-3 p-4 rounded-2xl shadow-lg shadow-neutral-500 bg-neutral-200 min-w-[30%]">
-          <h1 className="text-neutral-900 font-mono text-2xl text-center">
-            Login
-          </h1>
-          <h1 className="text-neutral-900 font-mono text-lg text-center">
-            Username :
-            <span>
-              <input
-                type="text"
-                className="ml-2 outline-0 border-b-2 pl-2"
-                value={creadentials.username}
-                onChange={(e) =>
-                  setcredentials((data) => ({
-                    ...data,
-                    username: e.target.value,
-                  }))
-                }
-              />
-            </span>
-          </h1>
-          <h1 className="text-neutral-900 font-mono text-lg text-center">
-            Password :
-            <span>
-              <input
-                type="text"
-                className="ml-2 outline-0 border-b-2 pl-2"
-                value={creadentials.password}
-                onChange={(e) =>
-                  setcredentials((data) => ({
-                    ...data,
-                    password: e.target.value,
-                  }))
-                }
-              />
-            </span>
-          </h1>
-
-          <button
-            className="bg-green-400 rounded-lg text-black font-mono px-3 py-2 w-fit self-center"
-            onClick={handleSubmit}
-          >
-            Submit
+      <div className="h-screen w-full flex flex-col items-center justify-center gap-3 bg-slate-900 text-neutral-100">
+        <h1 className="text-center font-bold text-2xl">Welcome Back</h1>
+        <input
+          type="text"
+          placeholder="username"
+          className="outline-none p-2 rounded-lg px-4 w-100 bg-slate-300/20 placeholder:text-slate-300"
+          value={creadentials.username}
+          onChange={(e) =>
+            setcredentials((data) => ({ ...data, username: e.target.value }))
+          }
+        />
+        <input
+          type="password"
+          placeholder="password"
+          className="outline-none p-2 rounded-lg px-4 w-100 bg-slate-300/20 placeholder:text-slate-300"
+          value={creadentials.password}
+          onChange={(e) =>
+            setcredentials((data) => ({ ...data, password: e.target.value }))
+          }
+        />
+        <button
+          className="text-white font-bold w-100 p-2 bg-blue-600 rounded-lg"
+          onClick={handleSubmit}
+        >
+          Login
+        </button>
+        <p className="text-[12px] text-neutral-300">
+          Don't Have an Account ?{" "}
+          <button onClick={SignupForm} className="underline">
+            Sign Up
           </button>
-
-          <h1 className="text-center font-mono  text-black">
-            Create new account,{" "}
-            <button
-              className="text-blue-500 underline outline-none"
-              onClick={SignupForm}
-            >
-              Sign Up
-            </button>
-          </h1>
-        </div>
+        </p>
       </div>
     </>
   );

@@ -10,11 +10,19 @@ function page() {
     password: "",
   });
   const [isLoading, setisLoading] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState("");
   const router = useRouter();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setisLoading(true);
+
+    if (creadentials.password !== confirmPassword) {
+      toast.error("Passwords do not match");
+      setisLoading(false);
+      return;
+    }
+
     try {
       if (!creadentials.username || !creadentials.password) {
         toast("Username and Password are required", { icon: "❗" });
@@ -44,63 +52,67 @@ function page() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-neutral-950 w-full">
+    <>
       <Toaster />
-      <div className="flex flex-col item-center justify-center gap-3 p-4 rounded-2xl shadow-lg shadow-neutral-500 bg-neutral-200 min-w-[30%]">
-        <h1 className="text-neutral-900 font-mono text-2xl text-center">
-          Register
-        </h1>
-        <h1 className="text-neutral-900 font-mono text-lg text-center">
-          Username :
-          <span>
-            <input
-              type="text"
-              className="ml-2 outline-0 border-b-2 pl-2"
-              value={creadentials.username}
-              onChange={(e) =>
-                setcredentials((data) => ({
-                  ...data,
-                  username: e.target.value,
-                }))
-              }
-            />
-          </span>
-        </h1>
-        <h1 className="text-neutral-900 font-mono text-lg text-center">
-          Password :
-          <span>
-            <input
-              type="text"
-              className="ml-2 outline-0 border-b-2 pl-2"
-              value={creadentials.password}
-              onChange={(e) =>
-                setcredentials((data) => ({
-                  ...data,
-                  password: e.target.value,
-                }))
-              }
-            />
-          </span>
-        </h1>
-
+      <div className="h-screen w-full flex flex-col items-center justify-center gap-3 bg-slate-900 text-neutral-100">
+        <h1 className="text-center font-bold text-2xl">Create your account</h1>
+        <div className="flex flex-col items-start justify-start w-100">
+          <label
+            htmlFor="username"
+            className=" text-slate-200 text-sm px-1"
+          >
+            Username{" "}
+          </label>
+          <input
+            type="text"
+            placeholder="Enter your username"
+            className="outline-none p-2 rounded-lg px-4 w-full bg-slate-300/20 placeholder:text-slate-300 placeholder:text-sm"
+            value={creadentials.username}
+            onChange={(e) =>
+              setcredentials((data) => ({ ...data, username: e.target.value }))
+            }
+          />
+        </div>
+        <div className="flex flex-col items-start justify-start w-100">
+          <label htmlFor="username" className=" text-slate-200 text-sm px-1">
+            Password{" "}
+          </label>
+          <input
+            type="password"
+            placeholder="Enter your password"
+            className="outline-none p-2 rounded-lg px-4 w-full bg-slate-300/20 placeholder:text-slate-300 placeholder:text-sm"
+            value={creadentials.password}
+            onChange={(e) =>
+              setcredentials((data) => ({ ...data, password: e.target.value }))
+            }
+          />
+        </div>
+        <div className="flex flex-col items-start justify-start w-100">
+          <label htmlFor="username" className="text-slate-200 text-sm px-1">
+            Confirm password{" "}
+          </label>
+          <input
+            type="password"
+            placeholder="Confirm your password"
+            className="outline-none p-2 rounded-lg px-4 w-full bg-slate-300/20 placeholder:text-slate-300 placeholder:text-sm"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+          />
+        </div>
         <button
-          className="bg-green-400 rounded-lg text-black font-mono px-3 py-2 w-fit self-center"
+          className="text-white font-bold w-100 p-2 bg-blue-600 rounded-lg"
           onClick={handleSubmit}
         >
-          Submit
+          Sign Up
         </button>
-
-        <h1 className="text-center font-mono  text-black">
-          Already have account ?{" "}
-          <button
-            className="text-blue-500 underline outline-none"
-            onClick={LoginForm}
-          >
+        <p className="text-[12px] text-neutral-300">
+          Already have an Account ?{" "}
+          <button onClick={LoginForm} className="underline">
             Login
           </button>
-        </h1>
+        </p>
       </div>
-    </div>
+    </>
   );
 }
 

@@ -20,8 +20,7 @@ function page() {
     const fetchUserId = async () => {
       try {
         const response = await axios.get("api/me");
-        // userId = response.data.userId;
-        // console.log("User ID: ", userId);
+
         return response.data.userId;
       } catch (error) {
         console.log("Failed to fetch user ID: ", error.message);
@@ -30,6 +29,24 @@ function page() {
 
     fetchUserId().then((id) => (id ? setUserId(id) : setUserId("")));
   }, []);
+
+  useEffect(() => {
+    const fetchPastMessages = async () => {
+      if (OpenChat.id) {
+        try {
+          // console.log("Fetching past messages for chat ID: ", OpenChat.id);
+          const response = await axios.get("api/message?chatId=" + OpenChat.id);
+          console.log("Past messages response: ", response.data);
+          setMessages(response.data.messages || []);
+          console.log("Past messages fetched: ", response.data.message);
+        } catch (error) {
+          console.log("Failed to fetch past messages: ", error.message);
+        }
+      }
+    };
+
+    fetchPastMessages();
+  }, [OpenChat]);
 
   useEffect(() => {
     const fetchUserList = async () => {
@@ -76,6 +93,7 @@ function page() {
   }, []);
 
   useEffect(() => {
+    setMessages([]);
     const fetchMessages = async () => {
       if (OpenChat) {
         try {
@@ -119,16 +137,17 @@ function page() {
   };
 
   const sendMessage = () => {
-    console.log(msg);
-    console.log();
+    // console.log(msg);
+    // console.log();
     if (msg.trim()) {
       socket.current.emit("send-message", {
         roomId: OpenChat.id,
         message: msg,
         sender: userId,
       });
-      setMessages((prev) => [...prev, { message: msg, sender: userId }]);
+      setMessages((prev) => [...prev, { content: msg, from: userId }]);
     }
+    setMsg("");
   };
 
   const chatComponent = () => {
@@ -136,19 +155,19 @@ function page() {
       <div className="flex flex-col bg-neutral-900 flex-1">
         {OpenChat.id ? (
           <div className="w-full flex flex-col bg-neutral-900 items-start justify-between relative h-full">
-            <div className="flex px-4 py-2 items-center bg-neutral-700 w-full">
+            <div className="flex px-4 py-2 items-center bg-neutral-700 w-full h-10">
               <h1 className="text-2xl font-mono text-neutral-200">
                 {OpenChat.username}
               </h1>
             </div>
-            <div className="flex-1 flex-col flex justify-end item-end w-full ">
+            <div className="flex-1 flex-col flex justify-end item-end w-full overflow-scroll">
               {Messages.map((msg, index) => {
                 return (
                   <div
                     key={index}
                     className="bg-neutral-700 text-neutral-200 p-2 rounded-lg m-1"
                   >
-                    <h1 className="text-2xl px-4 rounded-lg">{msg.message}</h1>
+                    <h1 className="text-2xl px-4 rounded-lg">{msg.content}</h1>
                   </div>
                 );
               })}
@@ -207,7 +226,7 @@ function page() {
           </button>
         </div>
       </Modal>
-      <div className="flex flex-row item-center justify-center flex-1 bg-neutral-900 divide-x-2  m-3 rounded-lg overflow-hidden">
+      <div className="flex flex-row item-center justify-center flex-1 bg-neutral-900 divide-x-2  m-3 rounded-lg overflow-hidden max-h-screen">
         <div className="flex flex-col w-[25%] outline-none outline-r-2 outline-neutral-500">
           <div className="flex justify-between items-center p-4 bg-neutral-700 text-neutral-200 outline-none outline-b-[1px] outline-neutral-600 mb-2">
             <h1 className="text-2xl font-mono">Chats</h1>
