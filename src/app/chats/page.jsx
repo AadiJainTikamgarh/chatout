@@ -3,9 +3,10 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import Modal from "@mui/material/Modal";
 import useSocket from "@/hooks/useSocket";
+import { set } from "mongoose";
 
 function page() {
-  let userId = "";
+  const [userId, setUserId] = useState("");
   const [OpenChat, setOpenChat] = useState({ id: "", username: "" });
   const [lastMessage, setLastMessage] = useState([]);
   const [ChatList, setChatList] = useState([]);
@@ -20,14 +21,15 @@ function page() {
     const fetchUserId = async () => {
       try {
         const response = await axios.get("api/me");
-        userId = response.data.userId;
+        // userId = response.data.userId;
         // console.log("User ID: ", userId);
+        return response.data.userId;
       } catch (error) {
         console.log("Failed to fetch user ID: ", error.message);
       }
     };
 
-    fetchUserId();
+    fetchUserId().then((id) => (id ? setUserId(id) : setUserId("")));
   }, []);
 
   useEffect(() => {
@@ -119,6 +121,7 @@ function page() {
 
   const sendMessage = () => {
     console.log(msg);
+    console.log();
     if (msg.trim()) {
       socket.current.emit("send-message", {
         roomId: OpenChat.id,
