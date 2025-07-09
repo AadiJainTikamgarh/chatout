@@ -3,7 +3,6 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import Modal from "@mui/material/Modal";
 import useSocket from "@/hooks/useSocket";
-import { set } from "mongoose";
 
 function page() {
   const [userId, setUserId] = useState("");
